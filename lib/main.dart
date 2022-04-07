@@ -57,7 +57,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
  @override
  void initState() {
-    // TODO: implement initState
    _controller.addListener(() {
      if (_debounce?.isActive ?? false) _debounce?.cancel();
      _debounce = Timer(const Duration(milliseconds: 500), () {
@@ -70,7 +69,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _debounce?.cancel();
     super.dispose();
   }

@@ -56,6 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
    final _controller = TextEditingController();
    Timer? _debounce;
+   var animeList = [];
 
 
  @override
@@ -71,11 +72,15 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
   }
 
-  void searchAnime(String text) {
+  void searchAnime(String text) async {
    final searchValue = text.split(" ").join("-");
 
-   if(text != "")
-   scraper.searchAnime(searchValue);
+   if(text != "") {
+     final result = await scraper.searchAnime(searchValue);
+     setState(() {
+       animeList = result;
+     });
+   }
   }
 
   @override
@@ -118,7 +123,11 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            TextField(decoration: const InputDecoration(labelText: "Search for anime"),controller: _controller,)
+            TextField(decoration: const InputDecoration(labelText: "Search for anime"),controller: _controller,),
+            Divider(),
+            ListView.builder(itemCount: animeList.length,itemBuilder: (_,i) {
+              return Card(child: Text(animeList[i]));
+            },scrollDirection: Axis.vertical,shrinkWrap: true,)
           ],
         ),
       ), // This trailing comma makes auto-formatting nicer for build methods.

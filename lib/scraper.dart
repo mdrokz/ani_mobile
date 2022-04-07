@@ -10,13 +10,19 @@ import 'package:html/dom.dart';
 
 final httpClient = HttpClient();
 
-Future<String> searchAnime(String name) async {
+Future<List<String>> searchAnime(String name) async {
+  final req = await httpClient
+      .getUrl(Uri.parse("${constants.baseUrl}/search.html?keyword=$name"));
 
-    final req = await httpClient.getUrl(Uri.parse("${constants.baseUrl}/search.html?keyword=$name"));
+  final res = await req.close();
 
-    final res = await req.close();
+  final html = (await res.transform(utf8.decoder).join()).parseString();
 
-    final html = await res.transform(utf8.decoder).join();
+  final animeList = html.querySelectorAll('a').where((x) {
+    return x.attributes["href"]!.contains("/videos/");
+  }).map((x) {
+    return x.attributes["href"]!;
+  }).toList();
 
-    return html;
+  return animeList;
 }

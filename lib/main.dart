@@ -3,7 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 
-import 'constants.dart' as constants;
+import 'scraper.dart' as scraper;
 
 void main() {
   runApp(const MyApp());
@@ -74,6 +74,8 @@ class _MyHomePageState extends State<MyHomePage> {
   void searchAnime(String text) {
    final searchValue = text.split(" ").join("-");
 
+   if(text != "")
+   scraper.searchAnime(searchValue);
   }
 
   @override

@@ -55,16 +55,23 @@ class _MyHomePageState extends State<MyHomePage> {
    final _controller = TextEditingController();
    Timer? _debounce;
 
+
  @override
  void initState() {
    _controller.addListener(() {
      if (_debounce?.isActive ?? false) _debounce?.cancel();
      _debounce = Timer(const Duration(milliseconds: 500), () {
        log(_controller.value.text);
+       searchAnime(_controller.value.text);
      });
    });
 
     super.initState();
+  }
+
+  void searchAnime(String text) {
+   final searchValue = text.split(" ").join("-");
+
   }
 
   @override

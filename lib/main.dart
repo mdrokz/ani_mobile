@@ -3,6 +3,8 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 
+import 'constants.dart' as constants;
+
 void main() {
   runApp(const MyApp());
 }

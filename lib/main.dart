@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -48,17 +51,28 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+   final _controller = TextEditingController();
+   Timer? _debounce;
+
+ @override
+ void initState() {
+    // TODO: implement initState
+   _controller.addListener(() {
+     if (_debounce?.isActive ?? false) _debounce?.cancel();
+     _debounce = Timer(const Duration(milliseconds: 500), () {
+       log(_controller.value.text);
+     });
+   });
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _debounce?.cancel();
+    super.dispose();
   }
 
   @override
@@ -95,14 +109,9 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            const TextField(decoration: InputDecoration(labelText: "Search for anime"),)
+            TextField(decoration: const InputDecoration(labelText: "Search for anime"),controller: _controller,)
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }

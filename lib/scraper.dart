@@ -24,5 +24,29 @@ Future<List<String>> searchAnime(String name) async {
     return x.attributes["href"]!;
   }).toList();
 
+  getEpisodes(animeList[0]);
+
   return animeList;
+}
+
+Future<List<String>> getEpisodes(String animeId) async {
+
+  final splitAnimeId = animeId.split('/');
+
+  final animeTempId = "/videos/${(splitAnimeId[2] = (splitAnimeId[2].split('-')..removeLast()).join('-'))}";
+
+  final req = await httpClient
+      .getUrl(Uri.parse("${constants.baseUrl}/$animeId"));
+
+  final res = await req.close();
+
+  final html = (await res.transform(utf8.decoder).join()).parseString();
+
+  final episodeList = html.querySelectorAll('a').reversed.where((x) {
+    return x.attributes["href"]!.contains(animeTempId);
+  }).map((x) {
+    return x.attributes["href"]!;
+  }).toList();
+
+  return episodeList;
 }

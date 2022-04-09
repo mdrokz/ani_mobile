@@ -28,12 +28,6 @@ Future<List<String>> searchAnime(String name) async {
     return x.attributes["href"]!;
   }).toList();
 
-  final x = await getEpisodes(animeList[0]);
-
-  final link = await getDpageLink(x[0]);
-
-  decryptLink("https:" + link);
-
   return animeList;
 }
 

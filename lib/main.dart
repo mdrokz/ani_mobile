@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 
 import 'scraper.dart' as scraper;
 
@@ -34,6 +36,65 @@ class MyApp extends StatelessWidget {
   }
 }
 
+class Episode extends StatefulWidget {
+  const Episode({Key? key, required this.streamLink}) : super(key: key);
+
+  final String streamLink;
+
+  @override
+  State<Episode> createState() => EpisodePage();
+}
+
+class EpisodePage extends State<Episode> {
+  late VlcPlayerController videoPlayerController;
+
+  @override
+  void initState() {
+    setState(() {
+      videoPlayerController = VlcPlayerController.network(
+        widget.streamLink,
+        hwAcc: HwAcc.full,
+        autoPlay: true,
+        options: VlcPlayerOptions(),
+      );
+    });
+    super.initState();
+  }
+
+  void disposeVideoController() async {
+    await videoPlayerController.stopRendererScanning();
+    await videoPlayerController.dispose();
+  }
+
+  @override
+  void deactivate() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.portraitUp,
+    ]);
+    disposeVideoController();
+    super.deactivate();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+
+    return Scaffold(
+      backgroundColor: Colors.white.withOpacity(0.85),
+      body: Center(
+          child: Row(children: [
+        Expanded(
+            child: VlcPlayer(
+                controller: videoPlayerController, aspectRatio: 16 / 9))
+      ])),
+    );
+  }
+}
+
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
 
@@ -53,34 +114,82 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final _controller = TextEditingController();
+  Timer? _debounce;
+  var animeList = [];
+  var episodes = [];
 
-   final _controller = TextEditingController();
-   Timer? _debounce;
-   var animeList = [];
+  @override
+  void initState() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.portraitUp,
+    ]);
 
-
- @override
- void initState() {
-   _controller.addListener(() {
-     if (_debounce?.isActive ?? false) _debounce?.cancel();
-     _debounce = Timer(const Duration(milliseconds: 1000), () {
-       log(_controller.value.text);
-       searchAnime(_controller.value.text);
-     });
-   });
+    _controller.addListener(() {
+      if (_debounce?.isActive ?? false) _debounce?.cancel();
+      _debounce = Timer(const Duration(milliseconds: 1000), () {
+        log(_controller.value.text);
+        searchAnime(_controller.value.text);
+      });
+    });
 
     super.initState();
   }
 
   void searchAnime(String text) async {
-   final searchValue = text.split(" ").join("-");
+    final searchValue = text.split(" ").join("-");
 
-   if(text != "") {
-     final result = await scraper.searchAnime(searchValue);
-     setState(() {
-       animeList = result;
-     });
-   }
+    if (text != "") {
+      setState(() {
+        episodes = [];
+      });
+      final result = await scraper.searchAnime(searchValue);
+      setState(() {
+        animeList = result;
+      });
+    }
+  }
+
+  void displayEpisodes(String anime) async {
+    var eps = [];
+    if (episodes.isEmpty) {
+      eps = await scraper.getEpisodes(anime);
+
+      setState(() {
+        episodes = eps;
+      });
+    }
+    showDialog(
+        context: context,
+        builder: (BuildContext build) {
+          return AlertDialog(
+              title: const Text("Episodes"),
+              content: ListView.builder(
+                  itemBuilder: (_, i) {
+                    return ListTile(
+                      title: Text(episodes[i].split("/")[2]),
+                      onTap: () {
+                        streamEpisode(episodes[i]);
+                      },
+                    );
+                  },
+                  itemCount: episodes.length,
+                  padding: const EdgeInsets.all(8),
+                  scrollDirection: Axis.vertical,
+                  shrinkWrap: true));
+        });
+  }
+
+  void streamEpisode(String episode) async {
+    final downloadLink = await scraper.getDpageLink(episode);
+
+    final streamLink = await scraper.decryptLink("https:" + downloadLink);
+
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (BuildContext context) => Episode(streamLink: streamLink),
+      fullscreenDialog: true,
+    ));
   }
 
   @override
@@ -123,11 +232,25 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            TextField(decoration: const InputDecoration(labelText: "Search for anime"),controller: _controller,),
+            TextField(
+              decoration: const InputDecoration(labelText: "Search for anime"),
+              controller: _controller,
+            ),
             const Divider(),
-            ListView.builder(itemCount: animeList.length,itemBuilder: (_,i) {
-              return Card(child: Text(animeList[i]));
-            },scrollDirection: Axis.vertical,shrinkWrap: true,)
+            Expanded(
+                child: ListView.builder(
+              itemCount: animeList.length,
+              itemBuilder: (_, i) {
+                return ListTile(
+                  title: Text(animeList[i].split('/')[2]),
+                  onTap: () {
+                    displayEpisodes(animeList[i]);
+                  },
+                );
+              },
+              // padding: const EdgeInsets.all(8),
+              shrinkWrap: true,
+            ))
           ],
         ),
       ), // This trailing comma makes auto-formatting nicer for build methods.

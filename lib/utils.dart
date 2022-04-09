@@ -84,11 +84,13 @@ String decode(Uint8List cipherText,String plainKey,String plainIv) {
     offset += cbc.processBlock(cipherText, offset, paddedText, offset);
   }
 
-  // final decoded = utf8.decode(paddedText);
+  final minByte = paddedText.reduce((value, element) {
+    return min(value,element);
+  });
 
-  // final minByte = decoded.codeUnits.reduce((value, element) {
-  //   return min(value,element);
-  // });
+  final cleanText = paddedText.where((x) {
+    return !(x == minByte);
+  }).toList();
 
-  return utf8.decode(paddedText).replaceAll('\f',"");
+  return utf8.decode(cleanText).replaceAll('\f',"");
 }

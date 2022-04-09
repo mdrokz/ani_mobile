@@ -63,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
  void initState() {
    _controller.addListener(() {
      if (_debounce?.isActive ?? false) _debounce?.cancel();
-     _debounce = Timer(const Duration(milliseconds: 500), () {
+     _debounce = Timer(const Duration(milliseconds: 1000), () {
        log(_controller.value.text);
        searchAnime(_controller.value.text);
      });
@@ -124,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             TextField(decoration: const InputDecoration(labelText: "Search for anime"),controller: _controller,),
-            Divider(),
+            const Divider(),
             ListView.builder(itemCount: animeList.length,itemBuilder: (_,i) {
               return Card(child: Text(animeList[i]));
             },scrollDirection: Axis.vertical,shrinkWrap: true,)

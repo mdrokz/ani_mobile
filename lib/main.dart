@@ -141,9 +141,6 @@ class _MyHomePageState extends State<MyHomePage> {
     final searchValue = text.split(" ").join("-");
 
     if (text != "") {
-      setState(() {
-        episodes = [];
-      });
       final result = await scraper.searchAnime(searchValue);
       setState(() {
         animeList = result;
@@ -152,14 +149,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void displayEpisodes(String anime) async {
-    var eps = [];
-    if (episodes.isEmpty) {
-      eps = await scraper.getEpisodes(anime);
-
-      setState(() {
-        episodes = eps;
-      });
-    }
+    var eps = await scraper.getEpisodes(anime);
     showDialog(
         context: context,
         builder: (BuildContext build) {
@@ -168,13 +158,13 @@ class _MyHomePageState extends State<MyHomePage> {
               content: ListView.builder(
                   itemBuilder: (_, i) {
                     return ListTile(
-                      title: Text(episodes[i].split("/")[2]),
+                      title: Text(eps[i].split("/")[2]),
                       onTap: () {
-                        streamEpisode(episodes[i]);
+                        streamEpisode(eps[i]);
                       },
                     );
                   },
-                  itemCount: episodes.length,
+                  itemCount: eps.length,
                   padding: const EdgeInsets.all(8),
                   scrollDirection: Axis.vertical,
                   shrinkWrap: true));

@@ -12,30 +12,30 @@ class Stream {
   Stream({
     required this.source,
     required this.sourceBk,
-    required this.track,
-    required this.advertising,
+    // required this.track,
+    // required this.advertising,
     required this.linkiframe,
   });
 
   List<Source> source;
   List<Source> sourceBk;
-  StreamTrack track;
-  List<dynamic> advertising;
+  // StreamTrack track;
+  // List<dynamic> advertising;
   String linkiframe;
 
   factory Stream.fromJson(Map<String, dynamic> json) => Stream(
     source: List<Source>.from(json["source"].map((x) => Source.fromJson(x))),
     sourceBk: List<Source>.from(json["source_bk"].map((x) => Source.fromJson(x))),
-    track: StreamTrack.fromJson(json["track"]),
-    advertising: List<dynamic>.from(json["advertising"].map((x) => x)),
+    // track: StreamTrack.fromJson(json["track"]),
+    // advertising: List<dynamic>.from(json["advertising"].map((x) => x)),
     linkiframe: json["linkiframe"],
   );
 
   Map<String, dynamic> toJson() => {
     "source": List<dynamic>.from(source.map((x) => x.toJson())),
     "source_bk": List<dynamic>.from(sourceBk.map((x) => x.toJson())),
-    "track": track.toJson(),
-    "advertising": List<dynamic>.from(advertising.map((x) => x)),
+    // "track": track.toJson(),
+    // "advertising": List<dynamic>.from(advertising.map((x) => x)),
     "linkiframe": linkiframe,
   };
 }

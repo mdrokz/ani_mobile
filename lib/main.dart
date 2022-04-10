@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
+import 'package:chewie/chewie.dart';
 
 import 'scraper.dart' as scraper;
 
@@ -47,6 +48,7 @@ class Episode extends StatefulWidget {
 
 class EpisodePage extends State<Episode> {
   late VlcPlayerController videoPlayerController;
+  late ChewieController chewieController;
 
   @override
   void initState() {
@@ -55,15 +57,31 @@ class EpisodePage extends State<Episode> {
         widget.streamLink,
         hwAcc: HwAcc.full,
         autoPlay: true,
+        autoInitialize: true,
         options: VlcPlayerOptions(),
       );
+      chewieController = ChewieController(
+        videoPlayerController: videoPlayerController,
+        autoPlay: false,
+        allowFullScreen: false,
+        fullScreenByDefault: false,
+        autoInitialize: false,
+      );
     });
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,overlays: []);
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+
+
     super.initState();
   }
 
   void disposeVideoController() async {
     await videoPlayerController.stopRendererScanning();
     await videoPlayerController.dispose();
+    chewieController.dispose();
   }
 
   @override
@@ -78,20 +96,11 @@ class EpisodePage extends State<Episode> {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
 
     return Scaffold(
-      backgroundColor: Colors.white.withOpacity(0.85),
-      body: Center(
-          child: Row(children: [
-        Expanded(
-            child: VlcPlayer(
-                controller: videoPlayerController, aspectRatio: 16 / 9))
-      ])),
-    );
+      body: Stack(children: [
+        Chewie(controller: chewieController,)
+      ],));
   }
 }
 

@@ -68,12 +68,11 @@ class EpisodePage extends State<Episode> {
         autoInitialize: false,
       );
     });
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,overlays: []);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
-
 
     super.initState();
   }
@@ -96,11 +95,14 @@ class EpisodePage extends State<Episode> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      body: Stack(children: [
-        Chewie(controller: chewieController,)
-      ],));
+        body: Stack(
+      children: [
+        Chewie(
+          controller: chewieController,
+        )
+      ],
+    ));
   }
 }
 
@@ -125,8 +127,9 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final _controller = TextEditingController();
   Timer? _debounce;
-  var animeList = [];
-  var episodes = [];
+  bool isSearching = false;
+  List<Map<String, String>> animeList = [];
+  List<Map<String, String>> episodes = [];
 
   @override
   void initState() {
@@ -138,7 +141,9 @@ class _MyHomePageState extends State<MyHomePage> {
     _controller.addListener(() {
       if (_debounce?.isActive ?? false) _debounce?.cancel();
       _debounce = Timer(const Duration(milliseconds: 1000), () {
-        log(_controller.value.text);
+        setState(() {
+          isSearching = true;
+        });
         searchAnime(_controller.value.text);
       });
     });
@@ -153,30 +158,64 @@ class _MyHomePageState extends State<MyHomePage> {
       final result = await scraper.searchAnime(searchValue);
       setState(() {
         animeList = result;
+        isSearching = false;
+      });
+    } else {
+      setState(() {
+        isSearching = false;
       });
     }
   }
 
   void displayEpisodes(String anime) async {
+    showDialog(context: context, builder: (_) {return const SizedBox(
+            child: Center(child: CircularProgressIndicator()),
+            width: 10,
+            height: 10,
+          );});
     var eps = await scraper.getEpisodes(anime);
+    Navigator.pop(context);
     showDialog(
         context: context,
         builder: (BuildContext build) {
           return AlertDialog(
               title: const Text("Episodes"),
-              content: ListView.builder(
-                  itemBuilder: (_, i) {
-                    return ListTile(
-                      title: Text(eps[i].split("/")[2]),
-                      onTap: () {
-                        streamEpisode(eps[i]);
-                      },
-                    );
-                  },
-                  itemCount: eps.length,
-                  padding: const EdgeInsets.all(8),
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true));
+              content: ListView.separated(
+                itemBuilder: (_, i) {
+                  final episode = eps[i].entries.first.key;
+                  final cover = eps[i].entries.first.value;
+                  return Flex(
+                    direction: Axis.horizontal,
+                    children: [
+                      ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            minWidth: 100,
+                            minHeight: 100,
+                            maxWidth: 100,
+                            maxHeight: 200,
+                          ),
+                          child: Image.network(
+                            cover,
+                            fit: BoxFit.cover,
+                          )),
+                      Expanded(
+                        child: Text(
+                          episode.split('/')[2],
+                          // style: const TextStyle(fontSize: 23)
+                        ),
+                      ),
+                      // const Divider()
+                    ],
+                  );
+                },
+                itemCount: eps.length,
+                padding: const EdgeInsets.all(8),
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                separatorBuilder: (_, i) {
+                  return const Divider();
+                },
+              ));
         });
   }
 
@@ -236,18 +275,53 @@ class _MyHomePageState extends State<MyHomePage> {
               controller: _controller,
             ),
             const Divider(),
-            Expanded(
-                child: ListView.builder(
+            isSearching ? const SizedBox(
+              child: Center(child: CircularProgressIndicator()),
+              width: 50,
+              height: 50,
+            ) : Expanded(
+                child:  ListView.separated(
               itemCount: animeList.length,
               itemBuilder: (_, i) {
-                return ListTile(
-                  title: Text(animeList[i].split('/')[2]),
+                final anime = animeList[i].entries.first.key;
+                final cover = animeList[i].entries.first.value;
+                return GestureDetector(
+                  child: Flex(
+                    direction: Axis.horizontal,
+                    children: [
+                      ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            minWidth: 100,
+                            minHeight: 100,
+                            maxWidth: 100,
+                            maxHeight: 200,
+                          ),
+                          child: Image.network(
+                            cover,
+                            fit: BoxFit.cover,
+                          )),
+                      Expanded(
+                        child: Text(anime.split('/')[2],
+                            style: const TextStyle(fontSize: 23)),
+                      ),
+                      // const Divider()
+                    ],
+                    // leading: ,
+                    // // leading: Image.network(cover, fit: BoxFit.fill,height: 100,width: 50,),
+                    // title: Text(anime.split('/')[2]),
+                    // onTap: () {
+                    //   displayEpisodes(anime);
+                    // },
+                  ),
                   onTap: () {
-                    displayEpisodes(animeList[i]);
+                    displayEpisodes(anime);
                   },
                 );
               },
-              // padding: const EdgeInsets.all(8),
+              separatorBuilder: (context, _) {
+                return const Divider();
+              },
+              // padding: const EdgeInsets.only(top: 0,right: 0,left: 0,bottom: 5),
               shrinkWrap: true,
             ))
           ],

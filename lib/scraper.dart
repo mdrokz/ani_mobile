@@ -12,7 +12,7 @@ import 'package:html/dom.dart';
 
 final httpClient = HttpClient();
 
-Future<List<String>> searchAnime(String name) async {
+Future<List<Map<String,String>>> searchAnime(String name) async {
   final req = await httpClient
       .getUrl(Uri.parse("${constants.baseUrl}/search.html?keyword=$name"));
 
@@ -25,13 +25,17 @@ Future<List<String>> searchAnime(String name) async {
   final animeList = html.querySelectorAll('a').where((x) {
     return x.attributes["href"]!.contains("/videos/");
   }).map((x) {
-    return x.attributes["href"]!;
+    final anime =  x.attributes["href"]!;
+    final cover = x.querySelector('img')?.attributes["src"]!;
+    return {
+      anime: cover!
+    };
   }).toList();
 
   return animeList;
 }
 
-Future<List<String>> getEpisodes(String animeId) async {
+Future<List<Map<String,String>>> getEpisodes(String animeId) async {
 
   final splitAnimeId = animeId.split('/');
 
@@ -49,7 +53,11 @@ Future<List<String>> getEpisodes(String animeId) async {
   final episodeList = html.querySelectorAll('a').reversed.where((x) {
     return x.attributes["href"]!.contains(animeTempId);
   }).map((x) {
-    return x.attributes["href"]!;
+    final episode =  x.attributes["href"]!;
+    final cover = x.querySelector('img')?.attributes["src"]!;
+    return {
+      episode: cover!
+    };
   }).toList();
 
   return episodeList;

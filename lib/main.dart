@@ -184,7 +184,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 itemBuilder: (_, i) {
                   final episode = eps[i].entries.first.key;
                   final cover = eps[i].entries.first.value;
-                  return Flex(
+                  return GestureDetector(onTap: () {
+                    streamEpisode(episode);
+                  },child: Flex(
                     direction: Axis.horizontal,
                     children: [
                       ConstrainedBox(
@@ -206,7 +208,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                       // const Divider()
                     ],
-                  );
+                  ));
                 },
                 itemCount: eps.length,
                 padding: const EdgeInsets.all(8),

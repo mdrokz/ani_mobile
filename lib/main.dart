@@ -8,6 +8,8 @@ import 'package:chewie/chewie.dart';
 
 import 'scraper.dart' as scraper;
 
+import 'widgets.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -97,12 +99,12 @@ class EpisodePage extends State<Episode> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Stack(
-      children: [
-        Chewie(
-          controller: chewieController,
-        )
-      ],
-    ));
+          children: [
+            Chewie(
+              controller: chewieController,
+            )
+          ],
+        ));
   }
 }
 
@@ -168,11 +170,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void displayEpisodes(String anime) async {
-    showDialog(context: context, builder: (_) {return const SizedBox(
+    showDialog(
+        context: context,
+        builder: (_) {
+          return const SizedBox(
             child: Center(child: CircularProgressIndicator()),
             width: 10,
             height: 10,
-          );});
+          );
+        });
     var eps = await scraper.getEpisodes(anime);
     Navigator.pop(context);
     showDialog(
@@ -184,31 +190,33 @@ class _MyHomePageState extends State<MyHomePage> {
                 itemBuilder: (_, i) {
                   final episode = eps[i].entries.first.key;
                   final cover = eps[i].entries.first.value;
-                  return GestureDetector(onTap: () {
-                    streamEpisode(episode);
-                  },child: Flex(
-                    direction: Axis.horizontal,
-                    children: [
-                      ConstrainedBox(
-                          constraints: const BoxConstraints(
-                            minWidth: 100,
-                            minHeight: 100,
-                            maxWidth: 100,
-                            maxHeight: 200,
+                  return GestureDetector(
+                      onTap: () {
+                        streamEpisode(episode);
+                      },
+                      child: Flex(
+                        direction: Axis.horizontal,
+                        children: [
+                          ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                minWidth: 100,
+                                minHeight: 100,
+                                maxWidth: 100,
+                                maxHeight: 200,
+                              ),
+                              child: Image.network(
+                                cover,
+                                fit: BoxFit.cover,
+                              )),
+                          Expanded(
+                            child: Text(
+                              episode.split('/')[2],
+                              // style: const TextStyle(fontSize: 23)
+                            ),
                           ),
-                          child: Image.network(
-                            cover,
-                            fit: BoxFit.cover,
-                          )),
-                      Expanded(
-                        child: Text(
-                          episode.split('/')[2],
-                          // style: const TextStyle(fontSize: 23)
-                        ),
-                      ),
-                      // const Divider()
-                    ],
-                  ));
+                          // const Divider()
+                        ],
+                      ));
                 },
                 itemCount: eps.length,
                 padding: const EdgeInsets.all(8),
@@ -273,80 +281,77 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             TextField(
-            autocorrect: true,
-            decoration: const InputDecoration(
-              hintText: 'Search for anime',
-              hintStyle: TextStyle(color: Colors.grey),
-              filled: true,
-              fillColor: Colors.white,
-              contentPadding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-              enabledBorder: OutlineInputBorder(
-                borderRadius:
-                BorderRadius.all(Radius.circular(7.0)),
-                borderSide:
-                BorderSide(color: Colors.blue, width: 2),
+              autocorrect: true,
+              decoration: const InputDecoration(
+                hintText: 'Search for anime',
+                hintStyle: TextStyle(color: Colors.grey),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(7.0)),
+                  borderSide: BorderSide(color: Colors.blue, width: 2),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(2.0)),
+                  borderSide: BorderSide(color: Colors.blue),
+                ),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius:
-                BorderRadius.all(Radius.circular(2.0)),
-                borderSide: BorderSide(color: Colors.blue),
-              ),
-            ),
               controller: _controller,
             ),
             const Divider(),
-            isSearching ? const SizedBox(
+            isSearching
+                ? const SizedBox(
               child: Center(child: CircularProgressIndicator()),
               width: 50,
               height: 50,
-            ) : Expanded(
-                child:  ListView.separated(
-              itemCount: animeList.length,
-              itemBuilder: (_, i) {
-                final anime = animeList[i].entries.first.key;
-                final cover = animeList[i].entries.first.value;
-                return GestureDetector(
-                  child: Flex(
-                    direction: Axis.horizontal,
-                    children: [
-                      ConstrainedBox(
-                          constraints: const BoxConstraints(
-                            minWidth: 100,
-                            minHeight: 100,
-                            maxWidth: 100,
-                            maxHeight: 200,
+            )
+                : Expanded(
+                child: ListView.separated(
+                  itemCount: animeList.length,
+                  itemBuilder: (_, i) {
+                    final anime = animeList[i].entries.first.key;
+                    final cover = animeList[i].entries.first.value;
+                    return GestureDetector(
+                      child: Flex(
+                        direction: Axis.horizontal,
+                        children: [
+                          ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                minWidth: 100,
+                                minHeight: 100,
+                                maxWidth: 100,
+                                maxHeight: 200,
+                              ),
+                              child: Image.network(
+                                cover,
+                                fit: BoxFit.cover,
+                              )),
+                          Expanded(
+                            child: Container(
+                                child: Text(anime.split('/')[2],
+                                    style: const TextStyle(fontSize: 23),
+                                    textAlign: TextAlign.center),
+                                padding: const EdgeInsets.only(
+                                    left: 0, top: 0, right: 40, bottom: 40)),
                           ),
-                          child: Image.network(
-                            cover,
-                            fit: BoxFit.cover,
-                          )),
-                      Expanded(
-                        child: Text(anime.split('/')[2],
-                            style: const TextStyle(fontSize: 23)),
+                          // const Divider()
+                        ],
                       ),
-                      // const Divider()
-                    ],
-                    // leading: ,
-                    // // leading: Image.network(cover, fit: BoxFit.fill,height: 100,width: 50,),
-                    // title: Text(anime.split('/')[2]),
-                    // onTap: () {
-                    //   displayEpisodes(anime);
-                    // },
-                  ),
-                  onTap: () {
-                    displayEpisodes(anime);
+                      onTap: () {
+                        displayEpisodes(anime);
+                      },
+                    );
                   },
-                );
-              },
-              separatorBuilder: (context, _) {
-                return const Divider();
-              },
-              // padding: const EdgeInsets.only(top: 0,right: 0,left: 0,bottom: 5),
-              shrinkWrap: true,
-            ))
+                  separatorBuilder: (context, _) {
+                    return const Divider();
+                  },
+                  shrinkWrap: true,
+                ))
           ],
         ),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
+      drawer: SettingsDrawer(), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

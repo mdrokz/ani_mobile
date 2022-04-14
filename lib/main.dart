@@ -99,12 +99,12 @@ class EpisodePage extends State<Episode> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Stack(
-          children: [
-            Chewie(
-              controller: chewieController,
-            )
-          ],
-        ));
+      children: [
+        Chewie(
+          controller: chewieController,
+        )
+      ],
+    ));
   }
 }
 
@@ -190,33 +190,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 itemBuilder: (_, i) {
                   final episode = eps[i].entries.first.key;
                   final cover = eps[i].entries.first.value;
-                  return GestureDetector(
-                      onTap: () {
-                        streamEpisode(episode);
-                      },
-                      child: Flex(
-                        direction: Axis.horizontal,
-                        children: [
-                          ConstrainedBox(
-                              constraints: const BoxConstraints(
-                                minWidth: 100,
-                                minHeight: 100,
-                                maxWidth: 100,
-                                maxHeight: 200,
-                              ),
-                              child: Image.network(
-                                cover,
-                                fit: BoxFit.cover,
-                              )),
-                          Expanded(
-                            child: Text(
-                              episode.split('/')[2],
-                              // style: const TextStyle(fontSize: 23)
-                            ),
-                          ),
-                          // const Divider()
-                        ],
-                      ));
+                  return ListCard(cover, episode, () {
+                    streamEpisode(episode);
+                  },
+                      const TextStyle(),
+                      const EdgeInsets.only(
+                          left: 10, right: 0, top: 0, bottom: 0));
                 },
                 itemCount: eps.length,
                 padding: const EdgeInsets.all(8),
@@ -302,56 +281,33 @@ class _MyHomePageState extends State<MyHomePage> {
             const Divider(),
             isSearching
                 ? const SizedBox(
-              child: Center(child: CircularProgressIndicator()),
-              width: 50,
-              height: 50,
-            )
+                    child: Center(child: CircularProgressIndicator()),
+                    width: 50,
+                    height: 50,
+                  )
                 : Expanded(
-                child: ListView.separated(
-                  itemCount: animeList.length,
-                  itemBuilder: (_, i) {
-                    final anime = animeList[i].entries.first.key;
-                    final cover = animeList[i].entries.first.value;
-                    return GestureDetector(
-                      child: Flex(
-                        direction: Axis.horizontal,
-                        children: [
-                          ConstrainedBox(
-                              constraints: const BoxConstraints(
-                                minWidth: 100,
-                                minHeight: 100,
-                                maxWidth: 100,
-                                maxHeight: 200,
-                              ),
-                              child: Image.network(
-                                cover,
-                                fit: BoxFit.cover,
-                              )),
-                          Expanded(
-                            child: Container(
-                                child: Text(anime.split('/')[2],
-                                    style: const TextStyle(fontSize: 23),
-                                    textAlign: TextAlign.center),
-                                padding: const EdgeInsets.only(
-                                    left: 0, top: 0, right: 40, bottom: 40)),
-                          ),
-                          // const Divider()
-                        ],
-                      ),
-                      onTap: () {
+                    child: ListView.separated(
+                    itemCount: animeList.length,
+                    itemBuilder: (_, i) {
+                      final anime = animeList[i].entries.first.key;
+                      final cover = animeList[i].entries.first.value;
+                      return ListCard(cover, anime, () {
                         displayEpisodes(anime);
                       },
-                    );
-                  },
-                  separatorBuilder: (context, _) {
-                    return const Divider();
-                  },
-                  shrinkWrap: true,
-                ))
+                          const TextStyle(fontSize: 23),
+                          const EdgeInsets.only(
+                              left: 0, top: 0, right: 40, bottom: 40));
+                    },
+                    separatorBuilder: (context, _) {
+                      return const Divider();
+                    },
+                    shrinkWrap: true,
+                  ))
           ],
         ),
       ),
-      drawer: SettingsDrawer(), // This trailing comma makes auto-formatting nicer for build methods.
+      drawer:
+          SettingsDrawer(), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

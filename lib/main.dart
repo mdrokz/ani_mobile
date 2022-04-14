@@ -273,7 +273,25 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             TextField(
-              decoration: const InputDecoration(labelText: "Search for anime"),
+            autocorrect: true,
+            decoration: const InputDecoration(
+              hintText: 'Search for anime',
+              hintStyle: TextStyle(color: Colors.grey),
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+              enabledBorder: OutlineInputBorder(
+                borderRadius:
+                BorderRadius.all(Radius.circular(7.0)),
+                borderSide:
+                BorderSide(color: Colors.blue, width: 2),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius:
+                BorderRadius.all(Radius.circular(2.0)),
+                borderSide: BorderSide(color: Colors.blue),
+              ),
+            ),
               controller: _controller,
             ),
             const Divider(),

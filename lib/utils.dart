@@ -24,11 +24,7 @@ extension Parser on String {
       words[i >>> 2] |= (codeUnitAt(i) & 0xff) << (24 - (i % 4) * 8);
     }
 
-    final cleanedWords = words.where((element) {
-      return !(element == 0);
-    }).toList();
-
-    return WordArray(cleanedWords, latin1StrLength);
+    return WordArray(words, latin1StrLength);
   }
 }
 

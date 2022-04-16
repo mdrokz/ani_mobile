@@ -83,14 +83,39 @@ Future<String> getDpageLink(String episodeLink) async {
   return "";
 }
 
-Future<String> decryptLink(String downloadLink) async {
-
-  final id = downloadLink.split('=')[1].split('&')[0];
-
-  final encrypted = utils.encodeToBase64(id, constants.secretKey, constants.iv);
+Future<Map<String,String>> extractKeys(String downloadLink) async {
 
   final req = await httpClient
-      .getUrl(Uri.parse("${constants.decryptionUrl}?id=$encrypted"));
+      .getUrl(Uri.parse(downloadLink));
+  req.headers.set("User-Agent",constants.userAgent);
+
+  final res = await req.close();
+
+  final html = (await res.transform(utf8.decoder).join()).parseString();
+
+  final keyData = utils.KeyData.scrapeKeys(html);
+
+  final decoded = base64.decode(keyData.secretValue);
+
+  final secretData = utils.decode(decoded, keyData.key, keyData.iv);
+
+  final alias = secretData.substring(0,secretData.indexOf("&"));
+
+  final id = utils.encodeToBase64(alias, keyData.key, keyData.iv);
+
+  return {
+    "alias": alias,
+    "id": id,
+    "key": keyData.decryptKey,
+    "iv": keyData.iv
+  };
+
+}
+
+Future<String> decryptLink(String alias,String id,String key,String iv) async {
+
+  final req = await httpClient
+      .getUrl(Uri.parse("${constants.decryptionUrl}?id=$id&alias=$alias"));
 
   req.headers.set("User-Agent",constants.userAgent);
   req.headers.add("X-Requested-With", "XMLHttpRequest");
@@ -103,7 +128,7 @@ Future<String> decryptLink(String downloadLink) async {
 
   final decrypted = base64.decode(base64Data);
 
-  final decryptedData = streamFromJson(utils.decode(decrypted, constants.secretKey, constants.iv));
+  final decryptedData = streamFromJson(utils.decode(decrypted, key, iv));
 
   return decryptedData.source.first.file;
 }

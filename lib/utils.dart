@@ -13,6 +13,84 @@ extension Parser on String {
   Document parseString() {
     return parse(this);
   }
+
+  WordArray parseHexString() {
+    final latin1StrLength = length;
+
+    // Convert
+    List<int> words =
+        List.generate(latin1StrLength >>> 2, (index) => 0, growable: false);
+    for (var i = 0; i < latin1StrLength; i++) {
+      words[i >>> 2] |= (codeUnitAt(i) & 0xff) << (24 - (i % 4) * 8);
+    }
+
+    return WordArray(words, latin1StrLength);
+  }
+}
+
+class WordArray {
+  WordArray(this.words, this.sigBytes);
+
+  final List<int> words;
+  final int sigBytes;
+
+  String stringify() {
+    // Convert
+    var hexChars = [];
+    for (var i = 0; i < sigBytes; i++) {
+      var bite = (words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff;
+      hexChars.add((bite >>> 4).toRadixString(16));
+      hexChars.add((bite & 0x0f).toRadixString(16));
+    }
+
+    return hexChars.join('');
+  }
+}
+
+class KeyData {
+  String iv = "";
+  String key = "";
+  String secretValue = "";
+  String decryptKey = "";
+
+  KeyData(this.iv, this.key, this.secretValue, this.decryptKey);
+
+  factory KeyData.scrapeKeys(Document html) {
+    var secretValue = html
+        .querySelector('script[data-name="episode"]')
+        ?.attributes["data-value"];
+
+    var keyIV = html
+        .querySelector("div[class*='container-']")
+        ?.attributes["class"]!
+        .split('-')
+        .removeLast()
+        .parseHexString()
+        .stringify();
+    var secondKeyId = html
+        .querySelector("div[class*='videocontent-']")
+        ?.attributes['class']!
+        .split('-')
+        .removeLast()
+        .parseHexString()
+        .stringify();
+    var keyId = html
+        .querySelector("body[class^='container-']")
+        ?.attributes['class']!
+        .split('-')
+        .removeLast()
+        .parseHexString()
+        .stringify();
+
+    if (secretValue != null &&
+        keyIV != null &&
+        secondKeyId != null &&
+        keyId != null) {
+      return KeyData(keyIV, keyId, secretValue, secondKeyId);
+    }
+
+    return KeyData("", "", "", "");
+  }
 }
 
 Uint8List pad(Uint8List src, int blockSize) {
@@ -44,8 +122,7 @@ Uint8List createUint8ListFromHexString(String hex) {
   return result;
 }
 
-String encodeToBase64(String plainText,String plainKey,String plainIv) {
-
+String encodeToBase64(String plainText, String plainKey, String plainIv) {
   final key = createUint8ListFromHexString(plainKey);
   final iv = createUint8ListFromHexString(plainIv);
 
@@ -54,7 +131,8 @@ String encodeToBase64(String plainText,String plainKey,String plainIv) {
   final cbc = CBCBlockCipher(engine)
     ..init(true, ParametersWithIV(KeyParameter(key), iv));
 
-  final paddedText = pad(createUint8ListFromString(plainText),engine.blockSize);
+  final paddedText =
+      pad(createUint8ListFromString(plainText), engine.blockSize);
 
   final cipherText = Uint8List(paddedText.length);
 
@@ -66,9 +144,7 @@ String encodeToBase64(String plainText,String plainKey,String plainIv) {
   return base64.encode(cipherText);
 }
 
-
-String decode(Uint8List cipherText,String plainKey,String plainIv) {
-
+String decode(Uint8List cipherText, String plainKey, String plainIv) {
   final key = createUint8ListFromHexString(plainKey);
   final iv = createUint8ListFromHexString(plainIv);
 
@@ -85,12 +161,12 @@ String decode(Uint8List cipherText,String plainKey,String plainIv) {
   }
 
   final minByte = paddedText.reduce((value, element) {
-    return min(value,element);
+    return min(value, element);
   });
 
   final cleanText = paddedText.where((x) {
     return !(x == minByte);
   }).toList();
 
-  return utf8.decode(cleanText).replaceAll('\f',"");
+  return utf8.decode(cleanText).replaceAll('\f', "");
 }

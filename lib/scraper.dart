@@ -95,18 +95,18 @@ Future<Map<String,String>> extractKeys(String downloadLink) async {
 
   final keyData = utils.KeyData.scrapeKeys(html);
 
-  final decoded = base64.decode(keyData.secretValue);
+  // final decoded = base64.decode(keyData.secretValue);
 
-  final secretData = utils.decode(decoded, keyData.key, keyData.iv);
+  // final secretData = utils.decode(decoded, keyData.key, keyData.iv);
 
-  final alias = secretData.substring(0,secretData.indexOf("&"));
+  // final alias = secretData.substring(0,secretData.indexOf("&"));
 
-  final id = utils.encodeToBase64(alias, keyData.key, keyData.iv);
+  final id = utils.encodeToBase64(keyData.alias, keyData.key, keyData.iv);
 
   return {
-    "alias": alias,
+    "alias": keyData.alias,
     "id": id,
-    "key": keyData.decryptKey,
+    "key": keyData.key,
     "iv": keyData.iv
   };
 

@@ -47,18 +47,36 @@ class WordArray {
   }
 }
 
+String decodeKey(String id, String iv) {
+  final decoded = utf8.decode(base64.decode(id));
+
+  final value = decoded + "" + iv;
+
+  final bytes =
+      List<int>.generate(value.length, (index) => index, growable: false);
+
+  return bytes
+      .map((x) => value.codeUnitAt(x).toRadixString(16))
+      .join("")
+      .substring(0, 32).parseHexString().stringify();
+}
+
 class KeyData {
   String iv = "";
   String key = "";
   String secretValue = "";
-  String decryptKey = "";
+  String alias = "";
 
-  KeyData(this.iv, this.key, this.secretValue, this.decryptKey);
+  // String decryptKey = "";
+
+  KeyData(this.iv, this.key, this.secretValue, this.alias);
 
   factory KeyData.scrapeKeys(Document html) {
     var secretValue = html
         .querySelector('script[data-name="episode"]')
         ?.attributes["data-value"];
+
+    var alias = html.querySelector("#id")?.attributes["value"]!;
 
     var keyIV = html
         .querySelector("div[class*='container-']")
@@ -67,26 +85,10 @@ class KeyData {
         .removeLast()
         .parseHexString()
         .stringify();
-    var secondKeyId = html
-        .querySelector("div[class*='videocontent-']")
-        ?.attributes['class']!
-        .split('-')
-        .removeLast()
-        .parseHexString()
-        .stringify();
-    var keyId = html
-        .querySelector("body[class^='container-']")
-        ?.attributes['class']!
-        .split('-')
-        .removeLast()
-        .parseHexString()
-        .stringify();
 
-    if (secretValue != null &&
-        keyIV != null &&
-        secondKeyId != null &&
-        keyId != null) {
-      return KeyData(keyIV, keyId, secretValue, secondKeyId);
+    if (secretValue != null && keyIV != null && alias != null) {
+      var key = decodeKey(alias, keyIV);
+      return KeyData(keyIV, key, secretValue, alias);
     }
 
     return KeyData("", "", "", "");

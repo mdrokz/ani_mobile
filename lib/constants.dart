@@ -11,6 +11,7 @@ String userAgent = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (
 String secondKeyPath = "div[class*='videocontent-']";
 String keyPath = "body[class^='container-']";
 String ivPath = "div[class*='container-']";
+String newSecretValuePath = "body[class*='container-']";
 String secretValuePath = 'script[data-name="episode"]';
 
 List<String> settings = [

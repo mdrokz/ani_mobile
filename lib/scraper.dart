@@ -97,7 +97,7 @@ Future<Map<String, String>> extractKeys(String downloadLink) async {
   // final alias = secretData.substring(0,secretData.indexOf("&")); https://goload.pro/streaming.php?id=MjYzMw==&title=Shingeki+no+Kyojin&typesub=SUB&sub=eyJlbiI6bnVsbCwiZXMiOm51bGx9&cover=aW1hZ2VzL2FuaW1lL1NoaW5nZWtpLW5vLUt5b2ppbi5qcGc=
 
   final encryptedId =
-      utils.encodeToBase64("MjYzMw==", keyData.secretValue, keyData.iv);
+      utils.encodeToBase64(id, keyData.secretValue, keyData.iv);
 
   return {
     "alias": keyData.token.alias,

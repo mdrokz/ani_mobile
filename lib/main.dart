@@ -212,7 +212,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final downloadLink = await scraper.getDpageLink(episode);
 
     final data = await scraper.extractKeys("https:" + downloadLink);
-    final streamLink = await scraper.decryptLink(data["alias"]!,data["id"]!,data["key"]!,data["iv"]!);
+    final streamLink = await scraper.decryptLink(data["alias"]!,data["token"]!,data["expires"]!,data["id"]!,data["key"]!,data["iv"]!);
 
     Navigator.of(context).push(MaterialPageRoute(
       builder: (BuildContext context) => Episode(streamLink: streamLink),

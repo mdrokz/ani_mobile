@@ -7,6 +7,8 @@ import "package:pointycastle/export.dart";
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 
+import 'constants.dart' as constants;
+
 import 'dart:math';
 
 extension Parser on String {
@@ -25,6 +27,10 @@ extension Parser on String {
     }
 
     return WordArray(words, latin1StrLength);
+  }
+
+  Uint8List decode() {
+    return base64.decode(this);
   }
 }
 
@@ -58,27 +64,62 @@ String decodeKey(String id, String iv) {
   return bytes
       .map((x) => value.codeUnitAt(x).toRadixString(16))
       .join("")
-      .substring(0, 32).parseHexString().stringify();
+      .substring(0, 32)
+      .parseHexString()
+      .stringify();
+}
+
+class TokenData {
+  String alias = "";
+  String token = "";
+  String expires = "";
+
+  TokenData(this.alias, this.token, this.expires);
 }
 
 class KeyData {
   String iv = "";
   String key = "";
   String secretValue = "";
-  String alias = "";
+  TokenData token = TokenData("", "", "");
 
-  // String decryptKey = "";
+  String decryptKey = "";
 
-  KeyData(this.iv, this.key, this.secretValue, this.alias);
+  KeyData(this.iv, this.key, this.secretValue, this.decryptKey, this.token);
 
   factory KeyData.scrapeKeys(Document html) {
-    var secretValue = html
+    final token = html
         .querySelector('script[data-name="episode"]')
-        ?.attributes["data-value"];
+        ?.attributes["data-value"]!
+        .decode();
 
-    var alias = html.querySelector("#id")?.attributes["value"]!;
+    final secretValue = html
+        .querySelector("body[class*='container-']")
+        ?.attributes["class"]!
+        .split("-")
+        .removeLast()
+        .parseHexString()
+        .stringify();
 
-    var keyIV = html
+    final alias = html.querySelector("#id")?.attributes["value"]!;
+
+    final key = html
+        .querySelector(constants.keyPath)
+        ?.attributes["class"]!
+        .split('-')
+        .removeLast()
+        .parseHexString()
+        .stringify();
+
+    final secondKey = html
+        .querySelector(constants.secondKeyPath)
+        ?.attributes["class"]!
+        .split('-')
+        .removeLast()
+        .parseHexString()
+        .stringify();
+
+    final keyIV = html
         .querySelector("div[class*='container-']")
         ?.attributes["class"]!
         .split('-')
@@ -86,12 +127,24 @@ class KeyData {
         .parseHexString()
         .stringify();
 
-    if (secretValue != null && keyIV != null && alias != null) {
-      var key = decodeKey(alias, keyIV);
-      return KeyData(keyIV, key, secretValue, alias);
+    if (secretValue != null &&
+        key != null &&
+        keyIV != null &&
+        secondKey != null &&
+        alias != null) {
+      final decodedToken = decode(token!, secretValue, keyIV);
+
+      final tokenParts = decodedToken
+          .split("&")
+          .where((x) => x.contains("token") || x.contains("expires"))
+          .map((x) => x.split("=").last)
+          .toList();
+      // var key = decodeKey(alias, keyIV);
+      return KeyData(keyIV, key, secretValue, secondKey,
+          TokenData(alias, tokenParts.first, tokenParts.last));
     }
 
-    return KeyData("", "", "", "");
+    return KeyData("", "", "", "", TokenData("", "", ""));
   }
 }
 

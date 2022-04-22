@@ -73,15 +73,22 @@ class TokenData {
   String alias = "";
   String token = "";
   String expires = "";
+  String op = "";
 
-  TokenData(this.alias, this.token, this.expires);
+  TokenData(this.alias, this.token, this.expires,this.op);
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return "$token&$expires&$op";
+  }
 }
 
 class KeyData {
   String iv = "";
   String key = "";
   String secretValue = "";
-  TokenData token = TokenData("", "", "");
+  TokenData token = TokenData("", "", "","");
 
   String decryptKey = "";
 
@@ -136,15 +143,14 @@ class KeyData {
 
       final tokenParts = decodedToken
           .split("&")
-          .where((x) => x.contains("token") || x.contains("expires"))
-          .map((x) => x.split("=").last)
+          .where((x) => x.contains("token") || x.contains("expires") || x.contains("op"))
           .toList();
       // var key = decodeKey(alias, keyIV);
       return KeyData(keyIV, key, secretValue, secondKey,
-          TokenData(alias, tokenParts.first, tokenParts.last));
+          TokenData(alias, tokenParts.first,tokenParts[1], tokenParts.last));
     }
 
-    return KeyData("", "", "", "", TokenData("", "", ""));
+    return KeyData("", "", "", "", TokenData("", "", "",""));
   }
 }
 

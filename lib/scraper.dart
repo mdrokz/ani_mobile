@@ -78,7 +78,7 @@ Future<String> getDpageLink(String episodeLink) async {
   return "";
 }
 
-Future<Map<String, String>> extractKeys(String downloadLink) async {
+Future<Map<String,utils.KeyData>> extractKeys(String downloadLink) async {
   final req = await httpClient.getUrl(Uri.parse(downloadLink));
   req.headers.set("User-Agent", constants.userAgent);
 
@@ -97,22 +97,17 @@ Future<Map<String, String>> extractKeys(String downloadLink) async {
   // final alias = secretData.substring(0,secretData.indexOf("&")); https://goload.pro/streaming.php?id=MjYzMw==&title=Shingeki+no+Kyojin&typesub=SUB&sub=eyJlbiI6bnVsbCwiZXMiOm51bGx9&cover=aW1hZ2VzL2FuaW1lL1NoaW5nZWtpLW5vLUt5b2ppbi5qcGc=
 
   final encryptedId =
-      utils.encodeToBase64("MjYzMw==", keyData.secretValue, keyData.iv);
+      utils.encodeToBase64(id, keyData.secretValue, keyData.iv);
 
   return {
-    "alias": keyData.token.alias,
-    "token": keyData.token.token,
-    "expires": keyData.token.expires,
-    "id": encryptedId,
-    "key": keyData.decryptKey,
-    "iv": keyData.iv
+    encryptedId: keyData,
   };
 }
 
-Future<String> decryptLink(String alias, String token, String expires,
+Future<String> decryptLink(utils.TokenData token,
     String id, String key, String iv) async {
   final req = await httpClient.getUrl(Uri.parse(
-      "${constants.decryptionUrl}?id=$id&alias=$alias&token=$token&expires=$expires"));
+      "${constants.decryptionUrl}?id=$id&alias=${token.alias}&$token"));
 
   req.headers.set("User-Agent", constants.userAgent);
   req.headers.add("X-Requested-With", "XMLHttpRequest");

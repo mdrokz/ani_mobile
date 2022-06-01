@@ -2,19 +2,22 @@ library ani_app.globals;
 
 
 // HTTP
-String baseUrl = "https://goload.pro";
-String decryptionUrl = "https://goload.pro/encrypt-ajax.php";
-String userAgent = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2919.83 Safari/537.36";
+const baseUrl = "https://goload.pro";
+const decryptionUrl = "https://goload.pro/encrypt-ajax.php";
+const userAgent = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2919.83 Safari/537.36";
 
+
+// Regex
+final titleRegex = RegExp(r'\b-episode-\d+|-dub-\d+|-ova-\d+');
 
 // HTML selectors
-String secondKeyPath = "div[class*='videocontent-']";
-String keyPath = "body[class^='container-']";
-String ivPath = "div[class*='container-']";
-String newSecretValuePath = "body[class*='container-']";
-String secretValuePath = 'script[data-name="episode"]';
+const secondKeyPath = "div[class*='videocontent-']";
+const keyPath = "body[class^='container-']";
+const ivPath = "div[class*='container-']";
+const newSecretValuePath = "body[class*='container-']";
+const secretValuePath = 'script[data-name="episode"]';
 
-List<String> settings = [
+const settings = [
   "",
   "History",
   "Favourites"

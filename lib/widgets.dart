@@ -48,7 +48,7 @@ Widget ListCard(
           Expanded(
             child: Container(
                 child: Text(
-                  title.split('/')[2],
+                  title.split('/')[2].replaceAll(constants.titleRegex, ""),
                   textAlign: TextAlign.center,
                   style: textStyle
                 ),

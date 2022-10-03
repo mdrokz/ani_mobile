@@ -186,25 +186,38 @@ class _MyHomePageState extends State<MyHomePage> {
         builder: (BuildContext build) {
           return AlertDialog(
               title: const Text("Episodes"),
-              content: ListView.separated(
-                itemBuilder: (_, i) {
-                  final episode = eps[i].entries.first.key;
-                  final cover = eps[i].entries.first.value;
-                  return ListCard(cover, episode, () {
-                    streamEpisode(episode);
-                  },
-                      const TextStyle(),
-                      const EdgeInsets.only(
-                          left: 10, right: 0, top: 0, bottom: 0));
-                },
-                itemCount: eps.length,
-                padding: const EdgeInsets.all(8),
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                separatorBuilder: (_, i) {
-                  return const Divider();
-                },
-              ));
+              content: SingleChildScrollView(
+                  child: SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  children: [
+                    ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight: MediaQuery.of(context).size.height * 0.4,
+                        ),
+                        child: ListView.separated(
+                          itemBuilder: (_, i) {
+                            final episode = eps[i].entries.first.key;
+                            final cover = eps[i].entries.first.value;
+                            return ListCard(cover, episode, () {
+                              streamEpisode(episode);
+                            },
+                                const TextStyle(),
+                                const EdgeInsets.only(
+                                    left: 10, right: 0, top: 0, bottom: 0));
+                          },
+                          itemCount: eps.length,
+                          padding: const EdgeInsets.all(8),
+                          scrollDirection: Axis.vertical,
+                          shrinkWrap: true,
+                          separatorBuilder: (_, i) {
+                            return const Divider();
+                          },
+                        ))
+                  ],
+                  mainAxisSize: MainAxisSize.min,
+                ),
+              )));
         });
   }
 
@@ -214,7 +227,8 @@ class _MyHomePageState extends State<MyHomePage> {
     final data = await scraper.extractKeys("https:" + downloadLink);
     final id = data.keys.first;
     final keyData = data.values.first;
-    final streamLink = await scraper.decryptLink(keyData.token,id,keyData.decryptKey,keyData.iv);
+    final streamLink = await scraper.decryptLink(
+        keyData.token, id, keyData.decryptKey, keyData.iv);
 
     Navigator.of(context).push(MaterialPageRoute(
       builder: (BuildContext context) => Episode(streamLink: streamLink),

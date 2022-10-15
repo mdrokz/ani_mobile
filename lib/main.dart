@@ -254,7 +254,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                          storage.setItem("favourites", favouriteToJson(favourites));
                                        });
                                      }
-                                   }, child: Icon(Icons.star_border_outlined,color: isFavourite,))
+                                   }, child: Icon(isFavourite == Colors.amberAccent ? Icons.star : Icons.star_border_outlined,color: isFavourite,))
                                 ]);
                           },
                           itemCount: eps.length,
@@ -379,7 +379,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               storage.setItem("favourites", favouriteToJson(favourites));
                             });
                           }
-                        }, child: Icon(Icons.star_border_outlined,color: isFavourite,))
+                        }, child: Icon(isFavourite == Colors.amberAccent ? Icons.star : Icons.star_border_outlined,color: isFavourite,))
                       ]);
                     },
                     separatorBuilder: (context, _) {

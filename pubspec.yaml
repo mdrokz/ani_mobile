@@ -36,6 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   html: ^0.15.0
   flutter_vlc_player: ^7.1.0
+  localstorage: 4.0.0+1
   chewie:
     git:
       url: https://github.com/mdrokz/chewie.git

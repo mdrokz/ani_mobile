@@ -10,7 +10,7 @@ const userAgent = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (K
 // Regex
 final titleRegex = RegExp(r'\b-episode-\d+|-dub-\d+|-ova-\d+');
 
-const localStorage = "ani-mobile";
+const localStorage = "ani-mobile.json";
 
 // HTML selectors
 const secondKeyPath = "div[class*='videocontent-']";

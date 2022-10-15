@@ -27,8 +27,9 @@ Widget SettingsDrawer() {
   ));
 }
 
-Widget ListCard(
-    String cover, String title, void Function() onTap, TextStyle textStyle,EdgeInsetsGeometry padding) {
+Widget ListCard({
+  required String cover, required String title, required void Function() onTap, required TextStyle textStyle, required EdgeInsetsGeometry padding
+,required List<Widget> children}) {
   return GestureDetector(
       onTap: onTap,
       child: Flex(
@@ -55,7 +56,7 @@ Widget ListCard(
                 padding: padding
             ),
           ),
-          const Icon(Icons.star_border_outlined,color: Colors.blueGrey,)
+          ...children
           // const Divider()
         ],
       ));

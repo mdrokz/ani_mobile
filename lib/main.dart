@@ -1,12 +1,18 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 
+import 'package:ani_app/favourites/types.dart' as fav;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:chewie/chewie.dart';
+import 'package:localstorage/localstorage.dart';
 
+import 'package:ani_app/favourites/types.dart';
 import 'scraper.dart' as scraper;
+
+import 'constants.dart' as constants;
 
 import 'widgets.dart';
 
@@ -132,6 +138,8 @@ class _MyHomePageState extends State<MyHomePage> {
   bool isSearching = false;
   List<Map<String, String>> animeList = [];
   List<Map<String, String>> episodes = [];
+  LocalStorage storage = LocalStorage(constants.localStorage);
+  Map<String,Favourite> favourites = {};
 
   @override
   void initState() {
@@ -139,6 +147,8 @@ class _MyHomePageState extends State<MyHomePage> {
       DeviceOrientation.portraitDown,
       DeviceOrientation.portraitUp,
     ]);
+
+    initFavourites();
 
     _controller.addListener(() {
       if (_debounce?.isActive ?? false) _debounce?.cancel();
@@ -151,6 +161,21 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
     super.initState();
+  }
+
+  void initFavourites() async {
+    final isStorageReady = await storage.ready;
+
+    if(isStorageReady) {
+      final jsonStr = storage.getItem("favourites");
+
+      if(jsonStr != null) {
+        setState(() {
+          favourites = favouriteFromJson(jsonStr);
+        });
+      }
+    }
+
   }
 
   void searchAnime(String text) async {
@@ -179,7 +204,13 @@ class _MyHomePageState extends State<MyHomePage> {
             height: 10,
           );
         });
-    var eps = await scraper.getEpisodes(anime);
+    final eps = await scraper.getEpisodes(anime);
+    final favourite = favourites[anime];
+    setState(() {
+      if(favourite != null && favourite.episodes.isEmpty) {
+        favourites[anime]?.episodes = List.generate(eps.length, (index) => null);
+      }
+    });
     Navigator.pop(context);
     showDialog(
         context: context,
@@ -199,12 +230,32 @@ class _MyHomePageState extends State<MyHomePage> {
                           itemBuilder: (_, i) {
                             final episode = eps[i].entries.first.key;
                             final cover = eps[i].entries.first.value;
-                            return ListCard(cover, episode, () {
-                              streamEpisode(episode);
-                            },
-                                const TextStyle(),
-                                const EdgeInsets.only(
-                                    left: 10, right: 0, top: 0, bottom: 0));
+                            // final favourite = favourites[anime];
+                            final isFavourite = favourites[anime]?.episodes[i] != null ? Colors.amberAccent : Colors.blueGrey;
+                            return ListCard(
+                                cover: cover,
+                                title: episode,
+                                onTap: () {
+                                  streamEpisode(episode);
+                                },
+                                textStyle: const TextStyle(),
+                                padding: const EdgeInsets.only(
+                                    left: 10, right: 0, top: 0, bottom: 0),
+                                children: [
+                                   GestureDetector( onTap: () {
+                                     if(isFavourite == Colors.amberAccent) {
+                                       setState(() {
+                                         favourites[anime]?.episodes.removeAt(i);
+                                         storage.setItem("favourites", favouriteToJson(favourites));
+                                       });
+                                     } else {
+                                       setState(() {
+                                         favourites[anime]?.episodes[i] = fav.Episode(title: episode,cover: cover);
+                                         storage.setItem("favourites", favouriteToJson(favourites));
+                                       });
+                                     }
+                                   }, child: Icon(Icons.star_border_outlined,color: isFavourite,))
+                                ]);
                           },
                           itemCount: eps.length,
                           padding: const EdgeInsets.all(8),
@@ -308,12 +359,28 @@ class _MyHomePageState extends State<MyHomePage> {
                     itemBuilder: (_, i) {
                       final anime = animeList[i].entries.first.key;
                       final cover = animeList[i].entries.first.value;
-                      return ListCard(cover, anime, () {
+                      final isFavourite = favourites[anime] != null ? Colors.amberAccent : Colors.blueGrey;
+                      return ListCard(cover: cover, title: anime, onTap: () {
                         displayEpisodes(anime);
                       },
-                          const TextStyle(fontSize: 23),
-                          const EdgeInsets.only(
-                              left: 0, top: 0, right: 40, bottom: 40));
+                          textStyle: const TextStyle(fontSize: 23),
+                          padding: const EdgeInsets.only(
+                              left: 0, top: 0, right: 40, bottom: 40),
+                      children: [
+                        GestureDetector( onTap: () {
+                          if(isFavourite == Colors.amberAccent) {
+                            setState(() {
+                              favourites.remove(anime);
+                              storage.setItem("favourites", favouriteToJson(favourites));
+                            });
+                          } else {
+                            setState(() {
+                              favourites[anime] = Favourite(title: anime,cover: cover, episodes: []);
+                              storage.setItem("favourites", favouriteToJson(favourites));
+                            });
+                          }
+                        }, child: Icon(Icons.star_border_outlined,color: isFavourite,))
+                      ]);
                     },
                     separatorBuilder: (context, _) {
                       return const Divider();

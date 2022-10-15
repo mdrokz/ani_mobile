@@ -1,5 +1,6 @@
 library ani_app.widgets;
 
+import 'package:ani_app/favourites/page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -22,7 +23,16 @@ Widget SettingsDrawer() {
           ),
         );
       }
-      return ListTile(title: Text(constants.settings[index]));
+      return ListTile(title: Text(constants.settings[index]),onTap: () {
+        switch(constants.settings[index]) {
+          case "Favourites": {
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (BuildContext context) => Favourites(),
+              fullscreenDialog: true,
+            ));
+          } break;
+        }
+      },);
     },
   ));
 }
@@ -30,6 +40,7 @@ Widget SettingsDrawer() {
 Widget ListCard({
   required String cover, required String title, required void Function() onTap, required TextStyle textStyle, required EdgeInsetsGeometry padding
 ,required List<Widget> children}) {
+  final split = title.split('/');
   return GestureDetector(
       onTap: onTap,
       child: Flex(
@@ -49,7 +60,7 @@ Widget ListCard({
           Expanded(
             child: Container(
                 child: Text(
-                  title.split('/')[2].replaceAll(constants.titleRegex, ""),
+                  split.length > 1 ? split[2].replaceAll(constants.titleRegex, "") : title,
                   textAlign: TextAlign.center,
                   style: textStyle
                 ),

@@ -10,6 +10,7 @@ import 'package:chewie/chewie.dart';
 import 'package:localstorage/localstorage.dart';
 
 import 'package:ani_app/favourites/types.dart';
+import 'package:wakelock/wakelock.dart';
 import 'scraper.dart' as scraper;
 
 import 'constants.dart' as constants;
@@ -82,6 +83,8 @@ class EpisodePage extends State<Episode> {
       DeviceOrientation.landscapeRight,
     ]);
 
+    Wakelock.enable();
+    
     super.initState();
   }
 
@@ -147,6 +150,8 @@ class _MyHomePageState extends State<MyHomePage> {
       DeviceOrientation.portraitDown,
       DeviceOrientation.portraitUp,
     ]);
+
+    Wakelock.disable();
 
     initFavourites();
 

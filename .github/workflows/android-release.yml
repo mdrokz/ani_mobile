@@ -7,7 +7,7 @@ on:
 jobs:
   version:
     name: Create version number
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v1
     - name: Fetch all history for all tags and branches
@@ -52,6 +52,7 @@ jobs:
     - run: flutter pub get
     # - run: flutter test
     - run: flutter build apk --release --split-per-abi
+    - run: flutter build ipa --release --no-codesign
     - run: flutter build appbundle
     - name: Create a Release in GitHub
       uses: ncipollo/release-action@v1

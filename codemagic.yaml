@@ -28,8 +28,7 @@ workflows:
       - flutter packages pub get
       - find . -name "Podfile" -execdir pod install \;
       - flutter build ios --release --no-codesign
-      - mkdir build/ios/iphoneos/Payload && mv build/ios/iphoneos/Runner.app build/ios/iphoneos/Payload/
-      - zip Payload.zip build/ios/iphoneos/Payload && mv build/ios/iphoneos/Payload.zip build/ios/iphoneos/ani_mobile.ipa
+      - zip ani_mobile.zip build/ios/iphoneos/Runner.app && mv build/ios/iphoneos/ani_mobile.zip build/ios/iphoneos/ani_mobile.ipa
       - flutter build apk --release --split-per-abi
       - flutter build appbundle
       - name: Publish to Github

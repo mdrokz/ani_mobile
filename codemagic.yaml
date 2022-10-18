@@ -26,9 +26,9 @@ workflows:
       - flutter build apk --release --split-per-abi
       - flutter build appbundle
     artifacts:
-      - build/ios/ipa/*.ipa
-      - build/**/outputs/**/*.aab
-      - build/**/outputs/**/*.apk
+      - build/ios/iphoneos/Runner.app.zip
+      - build/app/outputs/bundle/release/app-release.aab
+      - build/app/outputs/apk/release/*.apk
       - /tmp/xcodebuild_logs/*.log
       - '*.snap'
       - build/windows/**/*.msix

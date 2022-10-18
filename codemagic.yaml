@@ -48,8 +48,8 @@ workflows:
            build/app/outputs/apk/release/*.apk
     artifacts:
       - build/ios/iphoneos/ani_mobile.ipa
-      - build/android/apk/*.apk
-      - build/android/apk/*.aab
+      - build/app/outputs/bundle/release/app-release.aab
+      - build/app/outputs/apk/release/*.apk
     publishing:
       email:
         recipients:

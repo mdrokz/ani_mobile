@@ -41,8 +41,7 @@ workflows:
          fi
 
          gh release create "${CM_TAG}" \
-           --title "<Your Application Name> ${CM_TAG}" \
-           --notes-file changelog.md \
+           --title "Ani Mobile ${CM_TAG}" \
            build/ios/iphoneos/Runner.app \
            build/app/outputs/bundle/release/app-release.aab
            build/app/outputs/apk/release/*.apk

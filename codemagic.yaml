@@ -29,6 +29,7 @@ workflows:
       - find . -name "Podfile" -execdir pod install \;
       - flutter build ios --release --no-codesign
       - mkdir -p Payload
+      - mv ./build/ios/iphoneos/Runner.app Payload
       - zip -r -y Payload.zip Payload/Runner.app
       - mv Payload.zip build/ios/iphoneos/Payload.ipa
       - flutter build apk --release --split-per-abi

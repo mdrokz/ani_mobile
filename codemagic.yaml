@@ -27,8 +27,8 @@ workflows:
       - flutter build appbundle
     artifacts:
       - build/ios/ipa/*.ipa
-      - build/android/apk/*.apk
-      - build/android/apk/*.aab
+      - build/**/outputs/**/*.aab
+      - build/**/outputs/**/*.apk
       - /tmp/xcodebuild_logs/*.log
       - '*.snap'
       - build/windows/**/*.msix

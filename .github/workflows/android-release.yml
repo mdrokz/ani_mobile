@@ -41,7 +41,7 @@ jobs:
       with:
         flutter-version: '2.10.1'
     - name: Get version.txt
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4.1.7
       with:
         name: gitversion
     - name: Read version
